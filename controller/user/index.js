@@ -6,7 +6,7 @@ var User = require('../../db/user/')()
 exports.getUser = function (req,res) {
   var params = ['id']
   if(common.checkParams(req,params)){
-    User.find().findById(req.query.id).exec(function (err,user) {
+    User.find().findById(req.query.id).lean().exec(function (err,user) {
       res.json(_.assign(common.units.normalResult, {
         result: user
       }))
@@ -18,9 +18,14 @@ exports.getUser = function (req,res) {
 exports.getUserAll = function (req,res) {
   var params = []
   if(common.checkParams(req,params)){
-    User.find().selectAll().exec(function (err, users) {
+    User.find().selectAll().lean().exec(function (err, users) {
+      const users_ = Array.from(users).map((item) => {
+        item.id = item._id
+        delete item._id
+        return item
+      })
       res.json(_.assign(common.units.normalResult,{
-        result: users
+        result: users_
       }))
     })
   }else {
